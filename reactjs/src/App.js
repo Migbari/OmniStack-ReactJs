@@ -1,139 +1,56 @@
 // Importamos uma função do React (useState) para criação de estado
+// useEffect dispara função quando alguma informação é alterada ou unicamente na renderização do componente
 import React, { useState, useEffect } from 'react';
+import api from './services/api';
+
 import './global.css'
 import './App.css'
 import './Sidebar.css'
 import './Main.css'
 
+import DevForm from '../src/components/DevItem/DevForm/index'
+import DevItem from './components/DevItem/index'
+
 
 function App() {
-  const [github_username, setGithubUsername] = useState('');
-  const [techs, setTechs] = useState('');
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
+  // Armazena os Devs em um estado para mostrar em tela 
+  const [devs, setDevs] = useState([]);
 
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const {latitude, longitude } = position.coords;
-        // console.log(position);
-        setLatitude(latitude);
-        setLongitude(longitude);
-      },
-      (err) =>{
-        console.log(err);
-      },
-      {
-        timeout: 30000,
-      }
-    );
-  }, [])
-  
-    async function handleAddDev(e) {
-      e.preventDefault();
+    // Função que carrega os Devs da aplicação
+    async function loadDevs() {
+      const response = await api.get('/devs')
 
-      
+      setDevs(response.data)
     }
+    // Executa a função loadDevs após execução do useEffect
+    loadDevs();
+  }, []);
+  // Função que dispara ao clicar no submit do formulário
+  // Previniu o comportamento do formulario que é enviar usuário para outra tela
+  async function handleAddDev(data) {
 
-    return (
-      <div id="app">
-        <aside>
-          <strong>Cadastrar</strong>
-          <form onSubmit={handleAddDev}>
-            <div className="input_block">
-              {/* htmlFor para clicar em na label e direcionar ao input */}
-              <label htmlFor="github_username">Usuário do Github</label>
-              <input name="github_username" 
-              id="github_username" 
-              required
-              value={github_username}
-              onChange={e => setGithubUsername(e.target.value)}
-              />
-            </div>
+    // Chamada API
+    const response = await api.post('/devs', data)
+    // Limpa campos após chamada API
 
-            <div className="input_block">
-              <label htmlFor="techs">Tecnologias</label>
-              <input name="techs" 
-              id="techs" 
-              required
-              value={techs}
-              onChange={e => setTechs(e.target.value)}
-              />
-            </div>
-
-          <div className="input_group">
-            <div className="input_block">
-              <label htmlFor="latitude">Latitude</label>
-              <input type="number" 
-              name="latitude" id="latitude"
-              required value={latitude}
-              onChange={e => setLatitude(e.target.value)}
-              />
-            </div>
-
-            <div className="input_block">
-              <label htmlFor="longitude">Longitude</label>
-              <input type="number" 
-              name="longitude" 
-              id="longitude" 
-              required value={longitude}
-              onChange={e => setLongitude(e.target.value)}
-              />
-            </div>
-           </div>
-
-           <button type="submit">Salvar</button>
-          </form>
-        </aside>
-        <main>
-          <ul>
-            <li className="dev_item">
-              <header>
-                <img src="https://avatars1.githubusercontent.com/u/55153496?s=460&v=4" alt="Miguel Batista"/>
-                <div className="user_info">
-                  <strong>Miguel Batista</strong>
-                  <span>ReactJS, React Native, Node.js</span>
-                </div>
-              </header>
-              <p>May your faith in life be greater than your fears!</p>
-              <a href="https://github.com/Migbari">Acessar Perfil no Github</a>
-             </li>
-            <li className="dev_item">
-              <header>
-                <img src="https://avatars1.githubusercontent.com/u/55153496?s=460&v=4" alt="Miguel Batista"/>
-                <div className="user_info">
-                  <strong>Miguel Batista</strong>
-                  <span>ReactJS, React Native, Node.js</span>
-                </div>
-              </header>
-              <p>May your faith in life be greater than your fears!</p>
-              <a href="https://github.com/Migbari">Acessar Perfil no Github</a>
-             </li>
-            <li className="dev_item">
-              <header>
-                <img src="https://avatars1.githubusercontent.com/u/55153496?s=460&v=4" alt="Miguel Batista"/>
-                <div className="user_info">
-                  <strong>Miguel Batista</strong>
-                  <span>ReactJS, React Native, Node.js</span>
-                </div>
-              </header>
-              <p>May your faith in life be greater than your fears!</p>
-              <a href="https://github.com/Migbari">Acessar Perfil no Github</a>
-             </li>
-            <li className="dev_item">
-              <header>
-                <img src="https://avatars1.githubusercontent.com/u/55153496?s=460&v=4" alt="Miguel Batista"/>
-                <div className="user_info">
-                  <strong>Miguel Batista</strong>
-                  <span>ReactJS, React Native, Node.js</span>
-                </div>
-              </header>
-              <p>May your faith in life be greater than your fears!</p>
-              <a href="https://github.com/Migbari">Acessar Perfil no Github</a>
-             </li>
-          </ul>
-        </main>
-      </div>
+    setDevs([...devs, response.data]);
+  }
+  return (
+    <div id="app">
+      <aside>
+        <strong>Cadastrar</strong>
+        <DevForm onSubmit={handleAddDev} />
+      </aside>
+      <main>
+        <ul>
+          {/* () = como return */}
+          {devs.map(dev => (
+            <DevItem key={dev._id} dev={dev} />
+          ))}
+        </ul>
+      </main>
+    </div>
   );
 }
 
