@@ -8,7 +8,7 @@ import './App.css'
 import './Sidebar.css'
 import './Main.css'
 
-import DevForm from '../src/components/DevItem/DevForm/index'
+import DevForm from '../src/components/DevForm/index' 
 import DevItem from './components/DevItem/index'
 
 
